@@ -45,7 +45,7 @@ V²Flow introduces an advanced vector-quantized image tokenizer designed to seam
 
 
 # 🧩 Project Updates
-* **2025-03-31:** Release of the complete training and inference codebase for [V²Flow](https://arxiv.org/abs/2503.07493). Pretrained models (1024x1024 and 512x512 resolutions) will be available shortly.
+* **2025-03-30:** Release of the complete training and inference codebase for [V²Flow](https://arxiv.org/abs/2503.07493). Pretrained models (1024x1024 and 512x512 resolutions) will be available shortly.
 * **2025-03-10:** [V²Flow](https://arxiv.org/abs/2503.07493) is released on arXiv.
 
 # 🚀 Training & Inference
