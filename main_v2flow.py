@@ -32,6 +32,9 @@ def get_args_parser():
 
     #V2Flow parameters
     parser.add_argument('--downsampler_hidden_dim', default=512, type=int,help="Downsampler hidden dim")
+    parser.add_argument('--downsampler_depth', default=4, type=int,help="Downsampler depth")
+    parser.add_argument('--downsampler_mlp_depth', default=1, type=int,help="Downsampler mlp depth")
+
     parser.add_argument('--visual_vocabulary', default=False, type=bool,help="whether to use visual vocabulary resample. If False, it means that each visual token is not embedded into the pretrained LLMs vocabulary")
     parser.add_argument('--visual_codebook_size', default=16384, type=int)
     parser.add_argument('--flow_method', default='CondOT', choices=['linear_flow','CondOT'],type=str)
@@ -222,6 +225,8 @@ def main(args):
         flow_method=args.flow_method,
         llm_codebook_path=args.llm_codebook_path,
         projector_depth=args.projector_depth,
+        downsampler_depth=args.downsampler_depth,
+        downsampler_mlp_depth=args.downsampler_mlp_depth,
         patch_size=args.patch_size,
         vae_embed_dim=args.vae_embed_dim,
         mask_ratio_min=args.mask_ratio_min,

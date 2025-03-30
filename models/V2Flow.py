@@ -90,7 +90,8 @@ import torch.nn.functional as F
 class V2Flow(nn.Module):
     """ Masked Autoencoder with VisionTransformer backbone
     """
-    def __init__(self, img_size=256, vae_stride=16,downsampler_hidden_dim=512,visual_vocabulary=False,visual_codebook_size=16384,flow_method='linear_flow',llm_codebook_path=None,projector_depth=1, 
+    def __init__(self, img_size=256, vae_stride=16,downsampler_hidden_dim=512,visual_vocabulary=False,visual_codebook_size=16384,flow_method='linear_flow',llm_codebook_path=None,projector_depth=1,
+                 downsampler_depth=4,downsampler_mlp_depth=1,
                  patch_size=1,
                  encoder_embed_dim=1024, encoder_depth=16, encoder_num_heads=16,
                  decoder_embed_dim=1024, decoder_depth=16, decoder_num_heads=16,
@@ -109,7 +110,7 @@ class V2Flow(nn.Module):
                  grad_checkpointing=False,
                  ):
         super().__init__()
-        
+
         # V2Flow paramters
         self.downsampler_hidden_dim=downsampler_hidden_dim
         self.visual_vocabulary=visual_vocabulary
@@ -166,7 +167,7 @@ class V2Flow(nn.Module):
         self.decoder_norm = norm_layer(decoder_embed_dim)
         self.diffusion_pos_embed_learned = nn.Parameter(torch.zeros(1, self.seq_len, decoder_embed_dim))
         if not self.visual_vocabulary:
-            self.downsampler=STCConnector(self.vae_embed_dim,self.downsampler_hidden_dim,encoder_embed_dim,downsample=(1,1, 1))
+            self.downsampler=STCConnector(self.vae_embed_dim,self.downsampler_hidden_dim,encoder_embed_dim,downsample=(1,1, 1),depth=downsampler_depth,mlp_depth=downsampler_mlp_depth)
             self.quantizer = VectorQuantize(
                                 dim = encoder_embed_dim,
                                 codebook_size = self.visual_codebook_size,
@@ -267,7 +268,7 @@ class V2Flow(nn.Module):
     def forward_mae_encoder(self, x, mask, class_embedding):
         x = self.z_proj(x)
         bsz, seq_len, embed_dim = x.shape
-        
+
         # concat buffer
         x = torch.cat([torch.zeros(bsz, self.buffer_size, embed_dim, device=x.device), x], dim=1)
         mask_with_buffer = torch.cat([torch.zeros(x.size(0), self.buffer_size, device=x.device), mask], dim=1)
@@ -358,7 +359,7 @@ class V2Flow(nn.Module):
 
         # flowloss
         loss = self.forward_loss(z=z, target=gt_latents, mask=mask)
-        return loss+loss_vq 
+        return loss+loss_vq
 
     def sample_tokens(self, latents,bsz, num_iter=64, cfg=1.0, cfg_schedule="linear", labels=None, temperature=1.0, progress=False):
         if not self.visual_vocabulary:
@@ -373,8 +374,8 @@ class V2Flow(nn.Module):
             q_llm=torch.matmul(soft_one_hot,self.llm_embed_tokens.to(device=latents.device))
             vq_embeddings,indices, loss_vq  = self.quantizer(q_llm)
             post_quant=self.projector(vq_embeddings)
-            
-        
+
+
 
         # init and sample generation orders
         mask = torch.ones(bsz, self.seq_len).cuda()
@@ -384,7 +385,7 @@ class V2Flow(nn.Module):
         indices = list(range(num_iter))
         if progress:
             indices = tqdm(indices)
-        
+
         for step in indices:
             cur_tokens = tokens.clone()
 
