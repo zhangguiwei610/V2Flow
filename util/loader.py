@@ -1,10 +1,10 @@
-import random 
+import random
 import os
 import numpy as np
-from tqdm import tqdm 
+from tqdm import tqdm
 import torch
 import torchvision.datasets as datasets
-import glob 
+import glob
 import pickle
 class ImageFolderWithFilename(datasets.ImageFolder):
     def __getitem__(self, index: int):
@@ -36,29 +36,8 @@ class CachedFolder(datasets.DatasetFolder):
             loader=None,
             extensions=(".npz",),
         )
-        print("yes")
-        '''
-        filter_samples=[]
-        for i in tqdm(range(len(self.samples))):
-            path, target = self.samples[i]
-            indices_path=path.replace('cache_dcae','cache_vaekl_indices_0210').replace('npz','pth')
-            if not os.path.exists(indices_path):
-                continue
-            filter_samples.append(self.samples[i])
-        sup_paths=glob.glob('/nfs-134/zhangguiwei/cache_dcae/val/*.npz')
-        sup_paths+=glob.glob('/nfs-134/zhangguiwei/cache_dcae/test/*.npz')
-        for path in sup_paths:
-            target=0
-            indices_path=path.replace('cache_dcae','cache_vaekl_indices_0210').replace('npz','pth')
-            if not os.path.exists(indices_path):
-                continue
-            filter_samples.append((path,target))
-        self.samples=filter_samples
-        '''
-       # self.samples+=pickle.load(open('lmdb_filter_paths.pkl','rb'))
-      #  self.samples=pickle.load(open('dcae_1024_cache_paths.pkl','rb'))
-        self.samples=pickle.load(open('dcae_1024_cache_paths.pkl','rb'))
-    
+
+
     def __getitem__(self, index: int):
         """
         Args:
